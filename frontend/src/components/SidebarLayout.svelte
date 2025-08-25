@@ -23,7 +23,7 @@
       <div
         class="sticky h-16 py-4 pl-5 text-2xl font-bold border-b border-base-300 text-primary dark:text-white"
       >
-        Encrypted Notes
+        AI Passport
       </div>
       <div class="border-b">
         <div class="pl-4">My Principal:</div>
@@ -32,6 +32,14 @@
       <ul
         class="p-4 overflow-y-auto menu w-full bg-base-100 flex-1 flex flex-col"
       >
+        <li>
+          <a href="/passports">
+            <span class="w-6 h-6 p-1 mr-2">
+              <FaMobileAlt />
+            </span>
+            Agent Passports
+          </a>
+        </li>
         <li>
           <a href="/">
             <span class="w-6 h-6 p-1 mr-2">

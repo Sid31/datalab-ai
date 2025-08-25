@@ -4,6 +4,7 @@
   import EditNote from './EditNote.svelte';
   import NewNote from './NewNote.svelte';
   import Notes from './Notes.svelte';
+  import Passports from '../Passports.svelte';
   import SidebarLayout from './SidebarLayout.svelte';
 
   const routes = [
@@ -17,6 +18,10 @@
         { name: 'index', component: Notes },
         { name: 'edit/:id', component: EditNote },
       ],
+    },
+    {
+      name: '/passports',
+      component: Passports,
     },
   ];
 </script>

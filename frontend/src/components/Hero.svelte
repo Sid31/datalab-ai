@@ -22,14 +22,13 @@
       <h1
         class="mb-5 text-4xl sm:text-5xl font-bold text-primary dark:text-white"
       >
-        Encrypted Notes
+        AI Passport
       </h1>
       <p class="mb-5 text-xl font-semibold">
-        Your private notes on the Internet Computer.
+        Secure digital identities for AI agents on the Internet Computer.
       </p>
       <p class="mb-5">
-        A safe place to store your personal lists, thoughts, ideas or
-        passphrases and much more...
+        Create and manage agent passports with encrypted memories, specifications, and secure API access for AI agents like Eliza.
       </p>
 
       {#if auth.state === 'initializing-auth' || auth.state === 'initializing-crypto'}
@@ -44,7 +43,7 @@
         </div>
       {:else if auth.state === 'anonymous'}
         <button class="btn btn-primary" on:click={() => login()}
-          >Please login to start writing notes</button
+          >Login with Internet Identity to manage AI passports</button
         >
       {:else if auth.state === 'error'}
         <div class="text-lg font-semibold mt-8">An error occurred.</div>

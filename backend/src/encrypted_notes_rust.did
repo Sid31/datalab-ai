@@ -9,6 +9,12 @@ type anon_class_15_1 =
    whoami: () -> (text);
    symmetric_key_verification_key_for_note: () -> (text);
    encrypted_symmetric_key_for_note: (nat, blob) -> (text);
+   create_agent_passport: (text, text, vec text, text) -> (nat);
+   get_agent_passport: (nat) -> (opt AgentPassport);
+   get_my_passports: () -> (vec AgentPassport);
+   update_agent_specifications: (nat, text) -> ();
+   add_agent_memory: (nat, text, text, nat8) -> (nat);
+   get_agent_memories: (nat, opt text) -> (vec AgentMemory);
  };
 type EncryptedNote = 
  record {
@@ -16,5 +22,28 @@ type EncryptedNote =
    id: nat;
    owner: text;
    users: vec text;
+ };
+type AgentPassport = 
+ record {
+   id: nat;
+   agent_name: text;
+   agent_type: text;
+   owner: text;
+   capabilities: vec text;
+   encrypted_specifications: text;
+   api_endpoints: vec text;
+   created_at: nat64;
+   last_active: nat64;
+   is_active: bool;
+ };
+type AgentMemory = 
+ record {
+   id: nat;
+   passport_id: nat;
+   memory_type: text;
+   encrypted_content: text;
+   importance_score: nat8;
+   created_at: nat64;
+   owner: text;
  };
 service : () -> anon_class_15_1

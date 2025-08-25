@@ -16,10 +16,13 @@ export function createActor(options?: {
   agentOptions?: HttpAgentOptions;
   actorOptions?: ActorConfig;
 }): BackendActor {
+  // Use hardcoded canister ID for local development
+  const canisterId = process.env.CANISTER_ID_ENCRYPTED_NOTES || "uxrrr-q7777-77774-qaaaq-cai";
+  
   const hostOptions = {
     host:
       process.env.DFX_NETWORK === "ic"
-        ? `https://${process.env.CANISTER_ID_ENCRYPTED_NOTES}.ic0.app`
+        ? `https://${canisterId}.ic0.app`
         : "http://localhost:8000",
   };
   if (!options) {
@@ -48,7 +51,7 @@ export function createActor(options?: {
   // Creates an actor with using the candid interface and the HttpAgent
   return Actor.createActor(idlFactory, {
     agent,
-    canisterId: process.env.CANISTER_ID_ENCRYPTED_NOTES,
+    canisterId,
     ...options?.actorOptions,
   });
 }
