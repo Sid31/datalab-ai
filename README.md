@@ -1,45 +1,46 @@
-# Passeport - AI Agent Identity Control Plane
+# Synthetic Data Manager
 
-A decentralized identity and passport system for AI agents built on the Internet Computer Protocol (ICP) using vetKeys cryptography.
+A secure synthetic data management platform built on the Internet Computer Protocol (ICP) using vetKeys cryptography for privacy-preserving data operations.
 
 ## Overview
 
-This project transforms a vetKeys encrypted notes application into a Proof-of-Concept (POC) Control Plane for Agentic Identities. It provides secure, verifiable digital passports for AI agents with features like:
+This platform provides a decentralized solution for managing synthetic datasets with enterprise-grade security and privacy controls. Key features include:
 
-- **Decentralized Identity**: Principal-based authentication via Internet Identity
-- **Verifiable Credentials**: Agent passports with encrypted capabilities and attestations
-- **Secure Communication**: vetKeys threshold cryptography for agent-to-agent connections
-- **Monitoring & Governance**: Audit trails and policy enforcement for agent behavior
-- **Cross-App Integration**: Discord bot summoning and multi-platform agent coordination
+- **Secure Data Upload**: CSV file upload with client-side encryption
+- **Privacy-First Architecture**: vetKeys threshold cryptography for data protection
+- **Sample Dataset Library**: Pre-configured synthetic datasets for testing and development
+- **Access Control**: Principal-based authentication via Internet Identity
+- **Data Masking**: Built-in privacy controls for sensitive synthetic data
 
 ## Architecture
 
 ### Backend (Rust Canister)
 - **Identity Management**: Principal-based access control with Internet Identity integration
 - **Cryptographic Security**: vetKeys BLS12-381 G2 curve for secure key derivation
-- **Persistent Storage**: IC stable memory with 96GB capacity for agent data
-- **Verifiable Credentials**: Encrypted passport storage with sharing capabilities
+- **Persistent Storage**: IC stable memory with 96GB capacity for synthetic datasets
+- **Encrypted Storage**: Client-side encrypted dataset storage with sharing capabilities
 
 ### Frontend (Svelte + TypeScript)
 - **Authentication Flow**: Internet Identity integration with session management
 - **Encryption Service**: Client-side AES-GCM with vetKeys key derivation
-- **Agent Management UI**: Passport creation, editing, and sharing interfaces
-- **Real-time Monitoring**: Dashboard for agent activity and audit logs
+- **Dataset Management UI**: CSV upload, sample data loading, and dataset browsing
+- **Privacy Controls**: Data masking and access management interfaces
 
 ## Current Status
 
-**Foundation Complete (40%)**:
-- ✅ Principal-based authentication
-- ✅ vetKeys cryptographic integration
-- ✅ Stable memory storage architecture
-- ✅ Internet Identity authentication flow
+**Core Features Complete**:
+- ✅ Principal-based authentication with Internet Identity
+- ✅ CSV file upload with drag-and-drop interface
+- ✅ Sample synthetic dataset library
+- ✅ Client-side encryption using vetKeys
+- ✅ Dataset browsing and management UI
+- ✅ Privacy-preserving data storage
 
-**In Development**:
-- 🔲 Agent passport creation and management
-- 🔲 Audit logging and monitoring system
-- 🔲 Policy governance framework
-- 🔲 Discord bot integration
-- 🔲 Cross-app authentication protocols
+**Available Sample Datasets**:
+- 📊 Customer Demographics (1,000 rows)
+- 💰 Financial Transactions (2,500 rows)
+- 🏥 Healthcare Records (750 rows)
+- 🔧 IoT Sensor Data (5,000 rows)
 
 ## Quick Start
 
@@ -68,6 +69,7 @@ This project transforms a vetKeys encrypted notes application into a Proof-of-Co
 
 4. **Access the application**:
    - Frontend: `http://[canister-id].localhost:8000/`
+   - Login with Internet Identity to upload and manage synthetic datasets
    - Backend Candid UI: Available via dfx deploy output
 
 ### Environment Setup
@@ -78,15 +80,19 @@ CANISTER_ID_ENCRYPTED_NOTES=[canister-id]
 DFX_NETWORK=local
 ```
 
-## Development Roadmap
+## Features
 
-See [todo.md](./todo.md) for detailed implementation plan and [currint.md](./currint.md) for complete architecture documentation.
+### Data Upload & Management
+- **CSV Upload**: Drag-and-drop interface for uploading CSV files
+- **Sample Data**: Pre-loaded synthetic datasets for immediate testing
+- **Dataset Browser**: View and manage your uploaded datasets
+- **Column Preview**: See dataset structure and column information
 
-### Milestones
-- **Week 1**: Core Identity + Crypto (passport creation, secure connections)
-- **Week 2**: Monitoring + Governance (audit logs, policy enforcement)
-- **Week 3**: Integration (Discord bot, passport UI)
-- **Week 4**: Testing & Deployment (production readiness)
+### Privacy & Security
+- **Client-Side Encryption**: All data encrypted before upload
+- **Access Controls**: Principal-based dataset ownership
+- **Data Masking**: Privacy controls for sensitive information
+- **Secure Storage**: vetKeys cryptography for data protection
 
 ## Technology Stack
 
@@ -99,14 +105,18 @@ See [todo.md](./todo.md) for detailed implementation plan and [currint.md](./cur
 ## Security Features
 
 - **Threshold Cryptography**: vetKeys for distributed key generation
-- **Forward Secrecy**: Unique encryption keys per agent passport
+- **Forward Secrecy**: Unique encryption keys per dataset
 - **Access Control**: Principal-based authorization with sharing capabilities
-- **Client-Side Encryption**: Content never stored unencrypted on backend
+- **Client-Side Encryption**: Dataset content never stored unencrypted on backend
 - **Session Management**: 30-minute timeout with delegation chain handling
+- **Privacy-First**: Data masking and anonymization controls
 
-## Contributing
+## Use Cases
 
-This is a POC for AI agent identity management. See the transformation plan in `todo.md` for current development priorities.
+- **Data Scientists**: Securely share synthetic datasets for research
+- **ML Engineers**: Test models with privacy-preserving synthetic data
+- **Developers**: Access sample datasets for application development
+- **Organizations**: Manage synthetic data with enterprise-grade security
 
 ## License
 
@@ -114,4 +124,4 @@ This is a POC for AI agent identity management. See the transformation plan in `
 
 ---
 
-**Built on Internet Computer Protocol** - Leveraging ICP's decentralized infrastructure for secure, scalable AI agent identity management.
+**Built on Internet Computer Protocol** - Leveraging ICP's decentralized infrastructure for secure, scalable synthetic data management.

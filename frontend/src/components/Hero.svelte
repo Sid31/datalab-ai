@@ -22,13 +22,13 @@
       <h1
         class="mb-5 text-4xl sm:text-5xl font-bold text-primary dark:text-white"
       >
-        AI Passport
+        Synthetic Data Manager
       </h1>
       <p class="mb-5 text-xl font-semibold">
-        Secure digital identities for AI agents on the Internet Computer.
+        Secure synthetic data management platform on the Internet Computer.
       </p>
       <p class="mb-5">
-        Create and manage agent passports with encrypted memories, specifications, and secure API access for AI agents like Eliza.
+        Upload, manage, and share synthetic datasets with privacy-preserving encryption and access controls.
       </p>
 
       {#if auth.state === 'initializing-auth' || auth.state === 'initializing-crypto'}
@@ -43,7 +43,7 @@
         </div>
       {:else if auth.state === 'anonymous'}
         <button class="btn btn-primary" on:click={() => login()}
-          >Login with Internet Identity to manage AI passports</button
+          >Login with Internet Identity to manage synthetic datasets</button
         >
       {:else if auth.state === 'error'}
         <div class="text-lg font-semibold mt-8">An error occurred.</div>
