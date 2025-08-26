@@ -1,16 +1,26 @@
 # Synthetic Data Manager
 
-A secure synthetic data management platform built on the Internet Computer Protocol (ICP) using vetKeys cryptography for privacy-preserving data operations.
+A secure synthetic data management platform built on the Internet Computer Protocol (ICP) with encrypted storage for privacy-preserving data operations.
 
-## Overview
+## What This Does
 
-This platform provides a decentralized solution for managing synthetic datasets with enterprise-grade security and privacy controls. Key features include:
+This platform allows you to securely upload, store, and manage CSV datasets with complete privacy and decentralization. Built on ICP's blockchain infrastructure, it provides:
 
-- **Secure Data Upload**: CSV file upload with client-side encryption
-- **Privacy-First Architecture**: vetKeys threshold cryptography for data protection
-- **Sample Dataset Library**: Pre-configured synthetic datasets for testing and development
-- **Access Control**: Principal-based authentication via Internet Identity
-- **Data Masking**: Built-in privacy controls for sensitive synthetic data
+- **🔒 Secure CSV Upload**: Upload any CSV file with automatic encryption and storage
+- **📊 Dataset Management**: Browse, view, and manage your uploaded datasets
+- **🎯 Sample Data Library**: Pre-loaded synthetic datasets for immediate testing
+- **🔐 Privacy-First**: All data encrypted and stored on decentralized ICP canisters
+- **🌐 Internet Identity**: Secure authentication without passwords or emails
+- **💾 Persistent Storage**: Data survives canister upgrades using stable memory
+
+## Key Features
+
+- **Drag & Drop Upload**: Simple CSV file upload interface
+- **Large File Support**: Handles datasets up to 1M characters (thousands of rows)
+- **Real-time Preview**: See dataset structure and row counts before upload
+- **Encrypted Storage**: All data encrypted before storage on ICP blockchain
+- **Principal-based Access**: Only you can access your uploaded datasets
+- **Sample Datasets**: Test with pre-loaded employee, financial, and IoT data
 
 ## Architecture
 
@@ -42,35 +52,72 @@ This platform provides a decentralized solution for managing synthetic datasets 
 - 🏥 Healthcare Records (750 rows)
 - 🔧 IoT Sensor Data (5,000 rows)
 
-## Quick Start
+## Installation & Setup
 
 ### Prerequisites
-- [dfx](https://internetcomputer.org/docs/current/developer-docs/setup/install/) (ICP SDK)
-- [Rust](https://rustup.rs/) with wasm32-unknown-unknown target
-- [Node.js](https://nodejs.org/) (v16+)
-- [candid-extractor](https://crates.io/crates/candid-extractor)
 
-### Local Development
+Install the following tools before setting up the project:
 
-1. **Start the local replica**:
+1. **Install dfx (Internet Computer SDK)**:
+   ```bash
+   sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+   ```
+
+2. **Install Rust with WebAssembly target**:
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   rustup target add wasm32-unknown-unknown
+   ```
+
+3. **Install Node.js (v16 or higher)**:
+   ```bash
+   # macOS with Homebrew
+   brew install node
+   
+   # Or download from https://nodejs.org/
+   ```
+
+4. **Install candid-extractor**:
+   ```bash
+   cargo install candid-extractor
+   ```
+
+### Quick Start
+
+1. **Clone and navigate to project**:
+   ```bash
+   git clone <repository-url>
+   cd rust-vetkeys-rust
+   ```
+
+2. **Start local ICP network**:
    ```bash
    dfx start --background
    ```
 
-2. **Install frontend dependencies**:
+3. **Install frontend dependencies**:
    ```bash
-   cd frontend && npm install
+   cd frontend
+   npm install
+   cd ..
    ```
 
-3. **Deploy canisters**:
+4. **Deploy all canisters**:
    ```bash
    dfx deploy
    ```
 
-4. **Access the application**:
-   - Frontend: `http://[canister-id].localhost:8000/`
-   - Login with Internet Identity to upload and manage synthetic datasets
-   - Backend Candid UI: Available via dfx deploy output
+5. **Access the application**:
+   - Open the frontend URL shown in deploy output (e.g., `http://u6s2n-gx777-77774-qaaba-cai.localhost:8000/`)
+   - Click "Login with Internet Identity"
+   - Create a new Internet Identity when prompted
+   - Start uploading and managing your CSV datasets!
+
+### Troubleshooting
+
+- **Port conflicts**: If dfx fails to start, kill existing processes: `pkill -f dfx`
+- **Build errors**: Ensure Rust wasm32 target is installed: `rustup target add wasm32-unknown-unknown`
+- **Internet Identity issues**: Always create a new identity after fresh deployment
 
 ### Environment Setup
 
@@ -80,19 +127,30 @@ CANISTER_ID_ENCRYPTED_NOTES=[canister-id]
 DFX_NETWORK=local
 ```
 
-## Features
+## How to Use
 
-### Data Upload & Management
-- **CSV Upload**: Drag-and-drop interface for uploading CSV files
-- **Sample Data**: Pre-loaded synthetic datasets for immediate testing
-- **Dataset Browser**: View and manage your uploaded datasets
-- **Column Preview**: See dataset structure and column information
+### 1. Upload Your CSV Data
+- **Drag & Drop**: Simply drag your CSV file onto the upload area
+- **File Preview**: See row count and column headers before upload
+- **Large Files**: Supports datasets up to 1M characters (thousands of rows)
+- **Automatic Processing**: File is automatically parsed and encrypted
 
-### Privacy & Security
-- **Client-Side Encryption**: All data encrypted before upload
-- **Access Controls**: Principal-based dataset ownership
-- **Data Masking**: Privacy controls for sensitive information
-- **Secure Storage**: vetKeys cryptography for data protection
+### 2. Browse Your Datasets
+- **My Datasets**: View all your uploaded CSV files
+- **Dataset Details**: Click any dataset to see full structure and metadata
+- **Search & Filter**: Find specific datasets quickly
+- **Download**: Export your data when needed
+
+### 3. Try Sample Data
+- **One-Click Loading**: Test with pre-loaded synthetic datasets
+- **Various Types**: Employee data, financial records, IoT sensor data
+- **Instant Access**: No upload required, ready to explore immediately
+
+### Privacy & Security Features
+- **Encrypted Storage**: All data encrypted before storage on ICP blockchain
+- **Principal-based Access**: Only you can access your uploaded datasets
+- **No Passwords**: Secure authentication via Internet Identity
+- **Decentralized**: Data stored on ICP network, not centralized servers
 
 ## Technology Stack
 

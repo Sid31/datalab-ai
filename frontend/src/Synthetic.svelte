@@ -41,74 +41,78 @@
 </div>
 
 {#if $auth && $auth.state === 'initialized'}
-  <div class="container mx-auto p-4 max-w-6xl">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold mb-2">Synthetic Data Manager</h1>
-      <p class="text-gray-600">Upload, store, and manage your synthetic datasets with privacy controls</p>
-    </div>
+  <div class="min-h-screen bg-white">
+    <div class="container mx-auto p-4">
+      <!-- Header -->
+      <div class="header mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Synthetic Data Manager</h1>
+        <p class="text-gray-600">Manage your synthetic datasets with privacy-preserving encryption</p>
+      </div>
 
-    <!-- Tab Navigation -->
-    <div class="tabs tabs-boxed mb-6">
-      <button 
-        class="tab {activeTab === 'list' ? 'tab-active' : ''}"
-        on:click={() => switchTab('list')}
-      >
-        My Datasets
-      </button>
-      <button 
-        class="tab {activeTab === 'upload' ? 'tab-active' : ''}"
-        on:click={() => {
-          console.log('🔍 Upload CSV button clicked');
-          switchTab('upload');
-        }}
-      >
-        Upload CSV
-      </button>
-      <button 
-        class="tab {activeTab === 'sample' ? 'tab-active' : ''}"
-        on:click={() => switchTab('sample')}
-      >
-        Sample Data
-      </button>
-    </div>
+      <!-- Tab Navigation -->
+      <div class="tabs tabs-boxed mb-6 bg-gray-100">
+        <button 
+          class="tab nav-item {activeTab === 'list' ? 'tab-active active' : ''}"
+          on:click={() => switchTab('list')}
+        >
+          My Datasets
+        </button>
+        <button 
+          class="tab nav-item {activeTab === 'upload' ? 'tab-active active' : ''}"
+          on:click={() => switchTab('upload')}
+        >
+          Upload CSV
+        </button>
+        <button 
+          class="tab nav-item {activeTab === 'sample' ? 'tab-active active' : ''}"
+          on:click={() => switchTab('sample')}
+        >
+          Sample Data
+        </button>
+      </div>
 
-    <!-- Tab Content -->
-    <div class="tab-content">
-      {#if activeTab === 'list'}
-        {#key refreshKey}
-          <SyntheticList />
-        {/key}
-      {:else if activeTab === 'upload'}
-        <CSVUploader on:uploaded={handleDatasetUploaded} />
-      {:else if activeTab === 'sample'}
-        <SampleDataLoader on:loaded={handleDatasetUploaded} />
-      {:else}
-        <div class="alert alert-warning">
-          <span>Unknown tab: {activeTab}</span>
-        </div>
-      {/if}
+      <!-- Tab Content -->
+      <div class="tab-content">
+        {#if activeTab === 'list'}
+          {#key refreshKey}
+            <SyntheticList />
+          {/key}
+        {:else if activeTab === 'upload'}
+          <CSVUploader on:uploaded={handleDatasetUploaded} />
+        {:else if activeTab === 'sample'}
+          <SampleDataLoader on:loaded={handleDatasetUploaded} />
+        {:else}
+          <div class="alert alert-warning">
+            <span>Unknown tab: {activeTab}</span>
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
 {:else if $auth && $auth.state === 'anonymous'}
   <!-- Login prompt when not authenticated -->
-  <div class="container mx-auto p-4 max-w-md">
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body text-center">
-        <h2 class="card-title justify-center mb-4">Authentication Required</h2>
-        <p class="mb-6">Please log in with Internet Identity to access your synthetic datasets.</p>
-        <button class="btn btn-primary" on:click={login}>
-          Login with Internet Identity
-        </button>
+  <div class="min-h-screen bg-white flex items-center justify-center">
+    <div class="container mx-auto p-4 max-w-md">
+      <div class="card bg-white shadow-xl border border-gray-200">
+        <div class="card-body text-center">
+          <h2 class="card-title justify-center mb-4 text-gray-800">Authentication Required</h2>
+          <p class="mb-6 text-gray-600">Please log in with Internet Identity to access your synthetic datasets.</p>
+          <button class="btn btn-primary" on:click={login}>
+            Login with Internet Identity
+          </button>
+        </div>
       </div>
     </div>
   </div>
 {:else}
   <!-- Loading state while auth is initializing -->
-  <div class="container mx-auto p-4 max-w-md">
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body text-center">
-        <div class="loading loading-spinner loading-lg"></div>
-        <p class="mt-4">Initializing authentication...</p>
+  <div class="min-h-screen bg-white flex items-center justify-center">
+    <div class="container mx-auto p-4 max-w-md">
+      <div class="card bg-white shadow-xl border border-gray-200">
+        <div class="card-body text-center">
+          <div class="loading loading-spinner loading-lg text-primary"></div>
+          <p class="mt-4 text-gray-600">Initializing authentication...</p>
+        </div>
       </div>
     </div>
   </div>

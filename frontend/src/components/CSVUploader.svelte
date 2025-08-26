@@ -84,21 +84,26 @@ David Brown,david.brown@email.com,35,Phoenix,85000`;
       const headers = lines[0].split(',').map(h => h.trim());
       const dataRows = lines.slice(1).filter(line => line.trim());
 
-      // Create synthetic dataset entry (using existing passport structure for now)
-      const syntheticId = await $auth.actor.create_agent_passport(
-        fileName.replace('.csv', ''),
-        'csv_dataset',
-        headers, // Store column names as capabilities
-        await $auth.crypto.encryptWithNoteKey(
-          BigInt(Date.now()), 
-          $auth.actor.getPrincipal().toString(), 
-          fileContent
-        )
-      );
+      // Create empty note first, then update with data
+      const noteId = await $auth.actor.create_note();
+      
+      // Update the note with dataset JSON
+      const datasetInfo = JSON.stringify({
+        fileName: fileName,
+        type: 'csv_dataset',
+        headers: headers,
+        content: fileContent,
+        rowCount: dataRows.length,
+        uploadedAt: new Date().toISOString()
+      });
+      
+      console.log('🔍 About to update note:', noteId, 'with data:', datasetInfo);
+      await $auth.actor.update_note(noteId, datasetInfo);
+      console.log('✅ Note updated successfully');
 
-      console.log('Dataset uploaded successfully:', syntheticId);
+      console.log('Dataset uploaded successfully:', noteId);
       showSuccess(`Dataset uploaded successfully`);
-      dispatch('uploaded', { datasetId: syntheticId, fileName, headers, rowCount: dataRows.length });
+      dispatch('uploaded', { datasetId: noteId, fileName, headers, rowCount: dataRows.length });
       
       // Reset form
       fileName = '';

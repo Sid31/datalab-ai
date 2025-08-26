@@ -1,4 +1,4 @@
-# Continue building locally
+a # Continue building locally
 
 Projects deployed through ICP Ninja are temporary; they will only be live for 20 minutes before they are removed. The command-line tool `dfx` can be used to continue building your ICP Ninja project locally and deploy it to the mainnet.
 

@@ -29,21 +29,57 @@
     loading = true;
     try {
       const $auth = get(auth);
-      console.log('🔍 DatasetList - Loading datasets, auth state:', $auth?.state);
+      console.log('🔍 SyntheticList - Loading datasets...');
       
       if (!$auth || $auth.state !== 'initialized') {
-        console.error('🚨 DatasetList - Authentication not initialized:', $auth?.state);
+        console.error('Error loading datasets:', $auth?.state);
         showError('Authentication required');
         return;
       }
 
-      console.log('🔍 DatasetList - Calling get_my_passports...');
-      datasets = await $auth.actor.get_my_passports();
+      const result = await $auth.actor.get_notes();
+      // Parse the notes to extract dataset metadata (notes are stored as plain JSON now)
+      const parsedDatasets = [];
+      console.log('🔍 Raw notes from backend:', result);
+      console.log('🔍 Total notes found:', result.length);
       
-      // Sort by creation date (newest first)
-      datasets.sort((a, b) => Number(b.created_at) - Number(a.created_at));
+      for (const note of result) {
+        console.log('🔍 Processing note:', note.id, 'Content length:', note.encrypted_text?.length || 0, 'Content:', note.encrypted_text);
+        
+        // Skip empty or invalid notes
+        if (!note.encrypted_text || note.encrypted_text.trim() === '' || note.encrypted_text === 'temp') {
+          console.warn('Skipping empty or temp note:', note.id);
+          continue;
+        }
+        
+        try {
+          const datasetInfo = JSON.parse(note.encrypted_text);
+          console.log('✅ Parsed dataset info:', datasetInfo);
+          
+          // Only process notes that look like dataset info
+          if (datasetInfo.fileName || datasetInfo.type) {
+            parsedDatasets.push({
+              id: note.id,
+              agent_name: datasetInfo.fileName || 'Unknown Dataset',
+              agent_type: datasetInfo.type || 'dataset',
+              owner: note.owner,
+              capabilities: datasetInfo.headers || [],
+              created_at: BigInt(new Date(datasetInfo.uploadedAt || Date.now()).getTime() * 1000000),
+              last_active: BigInt(new Date(datasetInfo.uploadedAt || Date.now()).getTime() * 1000000),
+              is_active: true,
+              rowCount: datasetInfo.rowCount || 0,
+              sampleDataset: datasetInfo.sampleDataset || false
+            });
+          }
+        } catch (parseError) {
+          console.warn('Failed to parse dataset:', parseError, 'Content:', note.encrypted_text);
+        }
+      }
+      datasets = parsedDatasets;
+      console.log('✅ Datasets loaded:', datasets.length);
     } catch (error) {
-      showError(`Failed to load datasets: ${error.message}`);
+      console.error('Error loading datasets:', error);
+      showError('Failed to load datasets');
     } finally {
       loading = false;
     }

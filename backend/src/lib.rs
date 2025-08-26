@@ -219,7 +219,7 @@ impl Storable for NoteIds {
 // To ensure that our canister does not exceed the limit, we put various restrictions (e.g., number of users) in place.
 static MAX_USERS: u64 = 1_000;
 static MAX_NOTES_PER_USER: usize = 500;
-static MAX_NOTE_CHARS: usize = 1000;
+static MAX_NOTE_CHARS: usize = 1_000_000;
 static MAX_SHARES_PER_NOTE: usize = 50;
 
 thread_local! {

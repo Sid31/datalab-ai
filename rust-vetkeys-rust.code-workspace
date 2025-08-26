@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../datalab-ai/synt/src/frontend"
+		}
+	],
+	"settings": {}
+}

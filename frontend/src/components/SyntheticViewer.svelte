@@ -31,7 +31,7 @@
     loading = true;
     try {
       const $auth = get(auth);
-      console.log('🔍 PassportViewer - Loading synthetic data details...');
+      console.log('🔍 SyntheticViewer - Loading synthetic data details...');
       
       if (!$auth || $auth.state !== 'initialized') {
         console.error('Error loading synthetic data:', $auth?.state);
@@ -39,26 +39,39 @@
         return;
       }
 
-      const result = await $auth.actor.get_agent_passport(syntheticId);
-      if (result.length > 0) {
-        synthetic = result[0];
+      const result = await $auth.actor.get_notes();
+      const note = result.find(n => n.id === syntheticId);
+      if (note) {
         
-        // Decrypt specifications if they exist
-        if (synthetic.encrypted_specifications) {
-          try {
-            synthetic.decrypted_specifications = await $auth.crypto.decryptWithNoteKey(
-              syntheticId,
-              synthetic.owner,
-              synthetic.encrypted_specifications
-            );
-          } catch (error) {
-            console.warn('Could not decrypt specifications:', error);
-            synthetic.decrypted_specifications = '[Encrypted]';
-          }
+        // Parse the note content to get dataset info (stored as plain JSON now)
+        try {
+          const datasetInfo = JSON.parse(note.encrypted_text);
+          
+          // Transform note data to synthetic format for UI compatibility
+          synthetic = {
+            id: note.id,
+            agent_name: datasetInfo.fileName || 'Unknown Dataset',
+            agent_type: datasetInfo.type || 'dataset',
+            owner: note.owner,
+            capabilities: datasetInfo.headers || [],
+            created_at: BigInt(new Date(datasetInfo.uploadedAt || Date.now()).getTime() * 1000000),
+            last_active: BigInt(new Date(datasetInfo.uploadedAt || Date.now()).getTime() * 1000000),
+            is_active: true,
+            encrypted_specifications: datasetInfo.content || '',
+            decrypted_specifications: datasetInfo.content || '',
+            api_endpoints: [],
+            rowCount: datasetInfo.rowCount || 0,
+            sampleDataset: datasetInfo.sampleDataset || false,
+            description: datasetInfo.description || ''
+          };
+        } catch (parseError) {
+          console.error('Failed to parse dataset:', parseError);
+          showError('Failed to load dataset details');
         }
       }
     } catch (error) {
       console.error('Failed to load synthetic data:', error.message);
+      showError('Failed to load synthetic data');
     } finally {
       loading = false;
     }

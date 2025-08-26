@@ -69,22 +69,27 @@ DEV005,2024-01-15T08:00:00Z,22.3,46,Building C Floor 1,Normal`
         return;
       }
 
-      // Create dataset entry using existing backend structure
-      const syntheticId = await $auth.actor.create_agent_passport(
-        dataset.name,
-        'synthetic_dataset',
-        dataset.headers,
-        await $auth.crypto.encryptWithNoteKey(
-          BigInt(Date.now()), 
-          $auth.actor.getPrincipal().toString(), 
-          dataset.data
-        )
-      );
+      // Create empty note first, then update with data
+      const noteId = await $auth.actor.create_note();
+      
+      // Update the note with dataset JSON
+      const datasetInfo = JSON.stringify({
+        fileName: `${dataset.name.toLowerCase().replace(/\s+/g, '_')}.csv`,
+        type: 'synthetic_dataset',
+        headers: dataset.headers,
+        content: dataset.data,
+        rowCount: dataset.rowCount,
+        uploadedAt: new Date().toISOString(),
+        sampleDataset: true,
+        description: dataset.description
+      });
+      
+      await $auth.actor.update_note(noteId, datasetInfo);
 
-      console.log('Sample dataset loaded successfully:', syntheticId);
+      console.log('Sample dataset loaded successfully:', noteId);
       showSuccess(`Sample dataset "${dataset.name}" loaded successfully`);
       dispatch('loaded', { 
-        datasetId: syntheticId, 
+        datasetId: noteId, 
         fileName: `${dataset.name.toLowerCase().replace(/\s+/g, '_')}.csv`, 
         headers: dataset.headers, 
         rowCount: dataset.rowCount 
