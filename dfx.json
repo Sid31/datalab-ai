@@ -2,8 +2,12 @@
   "canisters": {
     "encrypted_notes": {
       "type": "rust",
+      "package": "encrypted_notes_backend",
       "candid": "backend/src/encrypted_notes_rust.did",
-      "package": "encrypted_notes_backend"
+      "declarations": {
+        "bindings": ["ts"],
+        "env_override": "local"
+      }
     },
     "internet-identity": {
       "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
