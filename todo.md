@@ -1,163 +1,287 @@
-# TODO: Transforming VetKeys Encrypted Notes App into POC Control Plane for Agentic Identities on ICP
+# VRAM-Synth: Decentralized Medical Synthetic Data Marketplace (Gretel AI Copycat POC)
 
-This TODO list outlines the current state of implementation based on the existing VetKeys Encrypted Notes Application architecture. It identifies what's already implemented (leveraging the principal-based auth, vetKeys crypto, stable storage, and frontend flows) and what needs to be added or modified to build a Proof-of-Concept (POC) Control Plane for Agentic Identities.
+**Status**: MVP Foundation Complete | Next: Marketplace Features & Medical Data Processing
 
-This POC aims to mimic features like agent discovery, verifiable passports (identities), secure connections, monitoring, governance, and cross-app integration (e.g., Discord summoning), as discussed in prior Cyata copycat plans.
+This project transforms the VetKeys encrypted notes app into a decentralized synthetic data marketplace inspired by Gretel AI, targeting medical/healthcare data with privacy-preserving features on ICP.
 
-**The transformation focuses on:**
-- Extending notes to store agent "passports" (verifiable credentials with principals, capabilities, and encrypted data)
-- Adding Cyata-inspired controls: Identification, monitoring (audit logs), governance (policies), and secure agent-to-passport binding
-- Maintaining ICP strengths: Decentralized persistence, vetKeys for secure key derivation, and Internet Identity (II) for auth
-
-## 1. Core Identity Infrastructure ✅ (Partially Complete)
-
-*This builds on the existing principal management and II integration to create "digital passports" for AI agents.*
-
-### Already Implemented ✅
-- [x] Principal-based authentication: Rejects anonymous callers; uses `caller()` for access control
-- [x] Internet Identity (II) integration: Handles delegation chains, session timeouts (30 mins), and localStorage persistence
-- [x] Principal string representation: Stored and compared for ownership (e.g., in `EncryptedNote.owner`)
-
-### To Implement 🔲
-- [ ] **Implement passport creation**: Extend `create_note` to generate a "passport note" type with agent-specific fields (e.g., capabilities, encrypted creds for tools like YouTube)
-- [ ] **Secure agent-to-passport binding**: Add verification in canister methods to ensure `caller()` matches passport's principal before actions (prevents rogue access)
-- [ ] **Add multi-agent support**: Allow passports to reference shared "swarm" notes for agent coordination
-
-## 2. Verifiable Credentials ✅ (Partially Complete)
-
-*Repurpose the note-sharing mechanism for issuing/verifying agent credentials (e.g., passports as verifiable, encrypted notes).*
-
-### Already Implemented ✅
-- [x] Note sharing: `add_user`/`remove_user` allows principal-based sharing (up to 50 shares per note)
-- [x] Owner permissions: Only owners can delete/update; shared users have read access
-- [x] Limits enforced: Max 1,000 users, 500 notes per user, etc., for basic governance
-
-### To Implement 🔲
-- [ ] **Extend notes to credentials**: Add a `CredentialNote` variant with fields for attestations (e.g., agent reputation, capabilities)
-- [ ] **Credential verification flow**: New method to verify passport signatures using vetKeys (e.g., check if credential note is signed by trusted principal)
-- [ ] **Integrate ZK-proofs (optional for MVP)**: Use ICP's crypto libs for simple proofs of credential ownership without revealing details
-
-## 3. Decentralized Storage ✅ (Partially Complete)
-
-*Leverage stable memory for persistent agent data (memory, passports, logs).*
-
-### Already Implemented ✅
-- [x] Stable memory setup: 4 memory regions for counters, notes, owner mappings, shared mappings
-- [x] Persistent storage: BTreeMap for notes; survives upgrades
-- [x] Data limits: 1,000 chars per note; scalable within canister
-
-### To Implement 🔲
-- [ ] **Add agent memory storage**: Implement vector embeddings in new memory region (e.g., `MemoryId(4)` for `StableVec<VectorEntry>` with ID, embedding, encrypted content)
-- [ ] **Passport storage**: Store passports as special notes with encrypted creds (e.g., API keys for cross-tools)
-- [ ] **Audit log storage**: New stable vec for action logs (principal, action, timestamp, intention) in `MemoryId(5)`
-
-## 4. Cryptographic Primitives ✅ (Mostly Complete)
-
-*Build on vetKeys for secure key derivation in agent contexts.*
-
-### Already Implemented ✅
-- [x] VetKeys integration: Symmetric key derivation with BLS12-381 G2 curve; `encrypted_symmetric_key_for_note` returns encrypted key
-- [x] AES-GCM encryption: Client-side with 12-byte IV; keys derived per note
-- [x] Key caching: Frontend uses IndexedDB for transport keys
-- [x] Forward secrecy: Unique keys per note
-
-### To Implement 🔲
-- [ ] **Agent-specific keys**: Modify derivation input to include agent principal + passport ID for secure connections
-- [ ] **Secure connection enforcement**: In canister, decrypt/verify only if caller principal matches passport owner
-- [ ] **Add signing for passports**: Use vetKeys to sign passport credentials for verifiability across apps
-
-## 5. Monitoring and Observability (Cyata-like) 🔲 (Not Started)
-
-*Add real-time tracking and audit trails for agent actions.*
-
-### Already Implemented ✅
-- [x] Basic logging: Implicit via canister traps and prints (e.g., for errors)
-
-### To Implement 🔲
-- [ ] **Implement action logging**: New `log_action` function to record every method call (e.g., store, retrieve) with intention param
-- [ ] **Query audit trails**: New `get_audit_logs(principal)` to return logs for forensics
-- [ ] **Real-time monitoring**: Add polling in frontend (every 3s like notes) for log updates in a dashboard view
-
-## 6. Governance and Control (Cyata-like) 🔲 (Not Started)
-
-*Enforce policies to manage agent behavior.*
-
-### Already Implemented ✅
-- [x] Basic authorization: Owner-only deletes; shared access controls
-- [x] Limits as soft governance: Enforced in code (e.g., max notes)
-
-### To Implement 🔲
-- [ ] **Policy storage**: New stable map for per-principal policies (allowed_actions, shutdown_flag, rate_limit)
-- [ ] **Enforce policies**: Wrapper function `enforce_policy` checked before every action
-- [ ] **Admin controls**: Methods like `shutdown_agent(principal)` to block rogue agents
-
-## 7. Frontend and Cross-App Integration ✅ (Partially Complete)
-
-*Extend UI for agent management; add Discord bot for summoning.*
-
-### Already Implemented ✅
-- [x] Auth flow: States from "initializing" to "initialized"; handles errors
-- [x] Note management UI: List, editor, sharing components
-- [x] Encryption in frontend: CryptoService handles derivation and AES-GCM
-
-### To Implement 🔲
-- [ ] **Passport UI**: New components for creating/viewing passports (e.g., `PassportEditor.svelte`)
-- [ ] **Cross-app**: Build Node.js Discord bot to summon agents (call `register_agent`), proxy canister calls with II delegation
-- [ ] **Secure connect in integrations**: Bot/client must auth with II and bind to passport before interactions
-
-## 8. Development and Testing ✅ (Partially Complete)
-
-*Ensure the POC is deployable and testable.*
-
-### Already Implemented ✅
-- [x] Build system: dfx for deployment; Cargo for Rust; Rollup for frontend
-- [x] Dependencies: @dfinity/vetkeys, auth-client, agent
-
-### To Implement 🔲
-- [ ] **Add tests**: Unit tests for new methods (e.g., policy enforcement) using ic-cdk-testers
-- [ ] **Fix technical debt**: Add error handling, inline docs, API docs (Candid comments)
-- [ ] **Deployment guide**: Write production notes (e.g., replace test keys, mainnet II provider)
-
-## 9. Scalability and Enhancements 🔲 (Future Work)
-
-*Address limitations for MVP viability.*
-
-### Current State ✅
-- [x] Single canister: Basic architecture in place
-
-### To Implement 🔲
-- [ ] **Sharding**: Prep for multi-canister (e.g., separate for logs vs. passports)
-- [ ] **UX improvements**: Add principal discovery (e.g., via shared notes); key rotation
-- [ ] **Security audits**: Manual review for new crypto flows
-
-## Milestones for MVP Completion
-
-### Week 1: Core Identity + Crypto
-- [ ] Implement passport creation/binding and secure connections
-- [ ] Agent-specific key derivation
-- [ ] Secure connection enforcement
-
-### Week 2: Monitoring + Governance
-- [ ] Add monitoring logs and governance policies
-- [ ] Action logging system
-- [ ] Policy enforcement framework
-
-### Week 3: Integration
-- [ ] Integrate Discord bot and frontend updates
-- [ ] Passport UI components
-- [ ] Cross-app authentication
-
-### Week 4: Testing & Deployment
-- [ ] Testing, docs, and demo deployment
-- [ ] Unit tests and integration tests
-- [ ] Production deployment guide
+## 🎯 Vision: Gretel AI Copycat on ICP
+- **Decentralized Gretel**: Upload → Obfuscate → Marketplace → Purchase/Download workflow
+- **Medical Focus**: Healthcare data with PII detection and medical-specific transformations
+- **ICP Native**: Leveraging canisters for data sovereignty and immutable audit trails
+- **Target Users**: Hospitals, universities, biotech companies, AI researchers
 
 ---
 
-**Progress Tracking**: Check off items as completed. This transforms the notes app into a Cyata-like control plane, focusing on secure, decentralized agent identities on ICP.
+## ✅ COMPLETED: Core Infrastructure (Week 1-3)
 
-**Current Status**: 
-- ✅ **Foundation Complete**: 40% (Identity, Storage, Crypto basics)
-- 🔲 **Core Features**: 0% (Passports, Monitoring, Governance)
-- 🔲 **Integration**: 0% (UI, Discord bot)
-- 🔲 **Production Ready**: 0% (Testing, Docs)
+### Backend (Rust Canister) ✅
+- [x] **Principal-based Authentication**: Internet Identity integration with session management
+- [x] **Encrypted Storage**: Client-side AES-GCM encryption with vetKeys key derivation
+- [x] **Large Dataset Support**: Increased MAX_NOTE_CHARS to 1M characters (handles thousands of rows)
+- [x] **Stable Memory**: Persistent storage across canister upgrades (96GB capacity)
+- [x] **CSV Data Processing**: JSON parsing and storage of uploaded datasets
+- [x] **Access Control**: Owner-only access with sharing capabilities (up to 50 users per dataset)
+- [x] **Error Handling**: Proper validation and error messages for upload failures
+- [x] **Production Ready**: Deployed and tested with large CSV files (1000+ rows)
+
+### Frontend (Svelte + TypeScript) ✅
+- [x] **Modern UI**: Tailwind CSS + DaisyUI with responsive design
+- [x] **Drag & Drop Upload**: Intuitive CSV file upload with real-time preview
+- [x] **Dataset Management**: Browse, view, and manage uploaded datasets
+- [x] **Sample Data Library**: Pre-loaded synthetic datasets (employee, financial, IoT)
+- [x] **Authentication Flow**: Complete II integration with session persistence
+- [x] **Encryption Service**: Client-side encryption before upload to backend
+- [x] **Debug Tools**: Comprehensive logging and state monitoring
+- [x] **File Preview**: Row count detection and column header display
+- [x] **Professional Sidebar**: Dark theme navigation with VRAM branding
+- [x] **Logo Integration**: Dynamic logo switching (full/icon) based on sidebar state
+- [x] **Responsive Design**: Mobile-first with collapsible sidebar and overlay
+- [x] **Navigation Structure**: Main sections (Upload, Datasets, Samples, Marketplace) + Workspace sections
+- [x] **Logo Click-to-Toggle**: Logo itself serves as expand/collapse button (no separate arrow)
+- [x] **Optimized Logo Sizing**: 2x larger expanded logo (h-20) for better brand visibility
+- [x] **Clean UI**: Removed arrow buttons for cleaner, more intuitive interaction
+
+### Development & Deployment ✅
+- [x] **Complete Build System**: dfx deployment with frontend build automation
+- [x] **Documentation**: Comprehensive README with installation instructions
+- [x] **Local Development**: Working dfx start → deploy → access workflow
+- [x] **Environment Setup**: Automatic .env generation with canister IDs
+- [x] **Asset Management**: VRAM logo files properly integrated and deployed
+
+---
+
+## 🔲 TODO: Gretel AI Marketplace Features (Next Phase)
+
+### 1. Medical Data Processing Pipeline 🔲
+- [ ] **PII Detection Engine**: Implement regex/ML-based detection for medical identifiers
+  - [ ] Detect: SSN, medical record numbers, patient IDs, phone numbers, addresses
+  - [ ] HIPAA compliance checks for protected health information (PHI)
+- [ ] **Medical Data Anonymization**: 
+  - [ ] Date shifting (maintain relative relationships)
+  - [ ] Demographic generalization (age ranges, zip code truncation)
+  - [ ] Medical code preservation (ICD-10, CPT codes)
+- [ ] **Data Quality Metrics**: Generate quality scores for synthetic data
+  - [ ] Statistical similarity measures
+  - [ ] Correlation preservation
+  - [ ] Distribution matching scores
+
+### 2. Synthetic Data Generation 🔲
+- [ ] **Synthetic Data Engine**: Implement basic synthetic data generation
+  - [ ] Statistical sampling methods
+  - [ ] Correlation-preserving transformations
+  - [ ] Medical-specific generators (vital signs, lab values, demographics)
+- [ ] **Generation Parameters**: User controls for synthetic data creation
+  - [ ] Privacy level settings (low/medium/high obfuscation)
+  - [ ] Sample size selection
+  - [ ] Column-specific transformation rules
+- [ ] **Validation Pipeline**: Ensure synthetic data quality
+  - [ ] Statistical tests against original data
+  - [ ] Privacy leakage detection
+  - [ ] Medical validity checks
+
+### 3. Marketplace Infrastructure 🔲
+- [ ] **Dataset Marketplace**: Public listing of available synthetic datasets
+  - [ ] Dataset catalog with metadata (rows, columns, medical specialty)
+  - [ ] Search and filtering by medical domain
+  - [ ] Preview capabilities (sample rows, statistics)
+- [ ] **Pricing & Payment**: ICP-native payment system
+  - [ ] ICP token integration for dataset purchases
+  - [ ] Pricing models (per-download, subscription, bulk)
+  - [ ] Revenue sharing for data contributors
+- [ ] **Access Control**: Marketplace-specific permissions
+  - [ ] Public/private dataset settings
+  - [ ] Purchaser verification and access grants
+  - [ ] Download tracking and audit trails
+
+### 4. Advanced Privacy Features 🔲
+- [ ] **Differential Privacy**: Add noise injection for stronger privacy guarantees
+- [ ] **K-Anonymity**: Ensure minimum group sizes for quasi-identifiers
+- [ ] **Synthetic Data Validation**: Privacy leakage testing
+- [ ] **Audit Trails**: Immutable logs of all data transformations and access
+
+### 5. Medical-Specific Features 🔲
+- [ ] **Medical Data Types**: Specialized handling for healthcare data
+  - [ ] EHR (Electronic Health Records) format support
+  - [ ] FHIR (Fast Healthcare Interoperability Resources) integration
+  - [ ] Medical imaging metadata (DICOM headers)
+- [ ] **Compliance Tools**: Healthcare regulation compliance
+  - [ ] HIPAA compliance reporting
+  - [ ] GDPR compliance for EU medical data
+  - [ ] Audit reports for regulatory submissions
+- [ ] **Medical Validation**: Domain-specific quality checks
+  - [ ] Medical code validation (ICD-10, SNOMED CT)
+  - [ ] Clinical range validation (vital signs, lab values)
+  - [ ] Temporal consistency checks (treatment sequences)
+
+### 6. Enhanced UI/UX 🔲
+- [ ] **Marketplace Interface**: Browse and purchase synthetic datasets
+  - [ ] Dataset catalog with search/filter
+  - [ ] Shopping cart and checkout flow
+  - [ ] Purchase history and download management
+- [ ] **Data Processing Dashboard**: Monitor synthetic data generation
+  - [ ] Progress tracking for data processing jobs
+  - [ ] Quality metrics visualization
+  - [ ] Privacy analysis reports
+- [ ] **Admin Panel**: Marketplace management tools
+  - [ ] Dataset approval workflow
+  - [ ] User management and verification
+  - [ ] Revenue analytics and reporting
+
+---
+
+## 🎯 3-Day Hackathon MVP Priorities
+
+### Day 1: Medical Data Processing
+- [ ] Basic PII detection (SSN, phone, email patterns)
+- [ ] Simple anonymization (hash IDs, date shifting)
+- [ ] Medical data validation (basic range checks)
+
+### Day 2: Marketplace Core
+- [ ] Public dataset listing page
+- [ ] Basic ICP payment integration
+- [ ] Dataset purchase and download flow
+
+### Day 3: Demo Polish
+- [ ] Sample medical datasets (cardiac, lab results, demographics)
+- [ ] End-to-end demo workflow
+- [ ] Presentation materials and demo script
+
+---
+
+## 🏗️ Technical Architecture
+
+### Current Stack ✅
+- **Backend**: Rust + IC CDK + vetKeys + Stable Structures
+- **Frontend**: Svelte + TypeScript + Tailwind CSS + DaisyUI
+- **Storage**: ICP Stable Memory (persistent, 96GB capacity)
+- **Auth**: Internet Identity (decentralized, passwordless)
+- **Crypto**: vetKeys (BLS12-381) + AES-GCM encryption
+
+### Planned Additions 🔲
+- **Payment**: ICP Ledger integration for marketplace transactions
+- **ML/AI**: Basic statistical synthetic data generation
+- **Medical**: FHIR/HL7 parsing libraries
+- **Privacy**: Differential privacy and k-anonymity libraries
+
+---
+
+## 🚀 Current Status Summary
+
+**✅ Foundation Complete (90%)**:
+- Secure CSV upload and storage ✅
+- Dataset management UI ✅
+- Authentication and encryption ✅
+- Large file support ✅
+- Professional UI/UX with sidebar navigation ✅
+- VRAM branding and logo integration ✅
+- Documentation and deployment ✅
+
+**🔲 Gretel.ai Copycat Features Missing (Critical for MVP)**:
+
+### **Core Gretel.ai Features We Need:**
+1. **Data Profiling & Analysis** (Gretel's data discovery)
+   - [ ] Statistical analysis of uploaded datasets
+   - [ ] Data quality scoring and recommendations
+   - [ ] Column type detection (PII, sensitive data, categorical, numerical)
+
+2. **Privacy & Anonymization** (Gretel's privacy engineering)
+   - [ ] PII detection and masking
+   - [ ] K-anonymity and l-diversity implementation
+   - [ ] Differential privacy noise injection
+   - [ ] Privacy risk assessment scores
+
+3. **Synthetic Data Generation** (Gretel's core feature)
+   - [ ] Statistical synthetic data generation
+   - [ ] Deep learning-based synthetic models
+   - [ ] Correlation preservation algorithms
+   - [ ] Quality metrics (statistical similarity, utility preservation)
+
+4. **Marketplace & Monetization** (Our ICP advantage)
+   - [ ] Public dataset catalog
+   - [ ] ICP token payment system
+   - [ ] Revenue sharing for data contributors
+   - [ ] Dataset licensing and access controls
+
+5. **Enterprise Features** (Gretel's business model)
+   - [ ] API access for programmatic usage
+   - [ ] Batch processing for large datasets
+   - [ ] Compliance reporting (HIPAA, GDPR)
+   - [ ] Team collaboration and workspace management
+
+**Next Critical Milestone**: Implement data profiling and PII detection to match Gretel's data discovery capabilities.
+
+---
+
+## 🎯 Gretel.ai Feature Parity Roadmap
+
+### **Phase 1: Data Intelligence (Week 4)**
+- [ ] Statistical profiling engine
+- [ ] PII detection patterns
+- [ ] Data quality scoring
+- [ ] Privacy risk assessment
+
+### **Phase 2: Synthetic Generation (Week 5-6)**
+- [ ] Basic statistical synthetic data generation
+- [ ] Correlation preservation algorithms
+- [ ] Quality validation pipeline
+- [ ] Medical data-specific generators
+
+### **Phase 3: Marketplace (Week 7-8)**
+- [ ] Public dataset catalog
+- [ ] ICP payment integration
+- [ ] Revenue sharing system
+- [ ] Download and licensing
+
+### **Phase 4: Enterprise (Week 9-10)**
+- [ ] API endpoints for programmatic access
+- [ ] Compliance reporting tools
+- [ ] Team workspace features
+- [ ] Advanced privacy controls
+
+---
+
+## 🔲 REMAINING MENU IMPLEMENTATIONS
+
+### **Currently Working Menu Items:**
+- [x] **Upload Dataset** - Fully functional CSV upload with encryption
+- [x] **My Datasets** - Browse and manage uploaded datasets
+- [x] **Sample Data** - Pre-loaded synthetic datasets for testing
+
+### **Menu Items Needing Implementation:**
+
+#### **Main Section:**
+- [ ] **Marketplace** - Public dataset catalog and purchase system
+  - [ ] Dataset discovery and search interface
+  - [ ] Dataset preview and metadata display
+  - [ ] Purchase workflow with ICP payments
+  - [ ] Download and access management
+
+#### **Workspace Section:**
+- [ ] **Generate Synthetic** - Core synthetic data generation
+  - [ ] Data profiling and analysis dashboard
+  - [ ] Privacy settings configuration (k-anonymity, differential privacy)
+  - [ ] Synthetic data generation parameters
+  - [ ] Quality metrics and validation results
+  - [ ] Export synthetic datasets
+
+- [ ] **Analytics** - Data insights and quality metrics
+  - [ ] Statistical analysis of uploaded datasets
+  - [ ] Data quality scoring and recommendations
+  - [ ] Privacy risk assessment dashboard
+  - [ ] Correlation and distribution analysis
+  - [ ] Synthetic vs. original data comparison
+
+- [ ] **Settings** - User preferences and configuration
+  - [ ] Privacy preferences and default settings
+  - [ ] Account management and profile
+  - [ ] API key generation and management
+  - [ ] Notification preferences
+  - [ ] Data retention and deletion policies
+
+### **Priority Implementation Order:**
+1. **Generate Synthetic** (Core Gretel.ai feature)
+2. **Marketplace** (Monetization and discovery)
+3. **Analytics** (Data intelligence and insights)
+4. **Settings** (User management and preferences)
+
+**Target**: Transform from "encrypted notes app" → "full Gretel.ai competitor" with ICP's decentralization advantages and medical data focus.
