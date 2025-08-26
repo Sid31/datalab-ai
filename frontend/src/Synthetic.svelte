@@ -4,6 +4,7 @@
   import CSVUploader from './components/CSVUploader.svelte';
   import SampleDataLoader from './components/SampleDataLoader.svelte';
   import SyntheticList from './components/SyntheticList.svelte';
+  import GenerateSynthetic from './components/GenerateSynthetic.svelte';
   import Sidebar from './components/Sidebar.svelte';
 
   let activeTab = 'upload';
@@ -112,15 +113,7 @@
               <p class="text-gray-600">Browse and purchase synthetic datasets from other users.</p>
             </div>
           {:else if activeTab === 'generate'}
-            <div class="text-center py-12">
-              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Synthetic Generation Coming Soon</h3>
-              <p class="text-gray-600">Generate privacy-preserving synthetic data from your datasets.</p>
-            </div>
+            <GenerateSynthetic />
           {:else if activeTab === 'analytics'}
             <div class="text-center py-12">
               <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

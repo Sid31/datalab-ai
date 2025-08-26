@@ -47,6 +47,23 @@ P****004,55-65,Arthritis,Physical Therapy,Stable,West
 P****005,25-35,Migraine,Medication B,Improved,North`
     },
     {
+      name: 'Medical Synthetic Demo',
+      description: 'Optimized medical dataset for synthetic data generation testing',
+      headers: ['id', 'age', 'gender', 'diagnosis', 'treatment', 'outcome', 'date'],
+      rowCount: 100,
+      data: `id,age,gender,diagnosis,treatment,outcome,date
+MED001,34,F,ICD_1050,TX_150,Improved,2024-01-15
+MED002,67,M,ICD_1120,TX_200,Stable,2024-01-16
+MED003,45,F,ICD_1075,TX_175,Improved,2024-01-17
+MED004,29,M,ICD_1200,TX_125,Stable,2024-01-18
+MED005,52,F,ICD_1300,TX_250,Improved,2024-01-19
+MED006,38,M,ICD_1150,TX_180,Stable,2024-01-20
+MED007,61,F,ICD_1400,TX_220,Improved,2024-01-21
+MED008,43,M,ICD_1250,TX_160,Stable,2024-01-22
+MED009,36,F,ICD_1350,TX_190,Improved,2024-01-23
+MED010,55,M,ICD_1180,TX_210,Stable,2024-01-24`
+    },
+    {
       name: 'IoT Sensor Data',
       description: 'Synthetic sensor readings from smart devices',
       headers: ['device_id', 'timestamp', 'temperature', 'humidity', 'location', 'status'],

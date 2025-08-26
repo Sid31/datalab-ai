@@ -7,6 +7,7 @@ use ic_stable_structures::{
 };
 use std::borrow::Cow;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 type PrincipalName = String;
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -14,6 +15,7 @@ type NoteId = u128;
 type PassportId = u128;
 type AgentMemoryId = u128;
 type ApiTokenId = u128;
+type SyntheticJobId = String;
 
 #[derive(Clone, Debug, CandidType, Deserialize, Eq, PartialEq)]
 pub struct EncryptedNote {
@@ -139,6 +141,47 @@ impl ApiToken {
 }
 
 impl Storable for ApiToken {
+    fn to_bytes(&self) -> Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+    fn from_bytes(bytes: Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+    const BOUND: Bound = Bound::Unbounded;
+}
+
+// Synthetic Data Generation Structs
+#[derive(Clone, Debug, CandidType, Deserialize, Eq, PartialEq)]
+pub struct SyntheticDataRequest {
+    pub dataset_id: String,
+    pub num_records: u32,
+    pub privacy_level: String, // "low", "medium", "high"
+    pub model_type: String, // "statistical", "medical_gpt", "deep_learning"
+    pub preserve_correlations: bool,
+    pub hipaa_compliant: bool,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Eq, PartialEq)]
+pub struct SyntheticDataJob {
+    pub job_id: SyntheticJobId,
+    pub dataset_id: String,
+    pub owner: PrincipalName,
+    pub status: String, // "pending", "processing", "completed", "failed"
+    pub progress: u8, // 0-100
+    pub created_at: u64,
+    pub completed_at: Option<u64>,
+    pub result_dataset_id: Option<String>,
+    pub error_message: Option<String>,
+    pub settings: SyntheticDataRequest,
+}
+
+impl SyntheticDataJob {
+    pub fn is_authorized(&self, user: &PrincipalName) -> bool {
+        user == &self.owner
+    }
+}
+
+impl Storable for SyntheticDataJob {
     fn to_bytes(&self) -> Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
@@ -301,6 +344,13 @@ thread_local! {
     static TOKEN_OWNERS: RefCell<StableBTreeMap<PrincipalName, TokenIds, Memory>> = RefCell::new(
         StableBTreeMap::init(
             MEMORY_MANAGER.with_borrow(|m| m.get(MemoryId::new(11))),
+        )
+    );
+
+    // Synthetic Data Job storage
+    static SYNTHETIC_JOBS: RefCell<StableBTreeMap<SyntheticJobId, SyntheticDataJob, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with_borrow(|m| m.get(MemoryId::new(12))),
         )
     );
 }
@@ -824,4 +874,180 @@ fn get_agent_memories(passport_id: PassportId, memory_type: Option<String>) -> V
             })
             .collect()
     })
+}
+
+// ===== SYNTHETIC DATA GENERATION FUNCTIONS =====
+
+/// Creates a new synthetic data generation job
+#[update]
+fn create_synthetic_job(request: SyntheticDataRequest) -> Result<String, String> {
+    let owner = caller().to_string();
+    
+    // Verify the dataset exists and user has access
+    let dataset_exists = NOTES.with_borrow(|notes| {
+        notes.iter().any(|(_, note)| {
+            note.id.to_string() == request.dataset_id && note.is_authorized(&owner)
+        })
+    });
+    
+    if !dataset_exists {
+        return Err("Dataset not found or access denied".to_string());
+    }
+    
+    let job_id = format!("job_{}_{}", ic_cdk::api::time(), owner.chars().take(8).collect::<String>());
+    let current_time = ic_cdk::api::time();
+    
+    let job = SyntheticDataJob {
+        job_id: job_id.clone(),
+        dataset_id: request.dataset_id.clone(),
+        owner,
+        status: "pending".to_string(),
+        progress: 0,
+        created_at: current_time,
+        completed_at: None,
+        result_dataset_id: None,
+        error_message: None,
+        settings: request,
+    };
+    
+    SYNTHETIC_JOBS.with_borrow_mut(|jobs| {
+        jobs.insert(job_id.clone(), job);
+    });
+    
+    Ok(job_id)
+}
+
+/// Gets the status of a synthetic data generation job
+#[update]
+fn get_synthetic_job_status(job_id: String) -> Result<SyntheticDataJob, String> {
+    let user_str = caller().to_string();
+    
+    SYNTHETIC_JOBS.with_borrow(|jobs| {
+        if let Some(job) = jobs.get(&job_id) {
+            if job.is_authorized(&user_str) {
+                Ok(job)
+            } else {
+                Err("Unauthorized access to job".to_string())
+            }
+        } else {
+            Err("Job not found".to_string())
+        }
+    })
+}
+
+/// Updates the progress of a synthetic data generation job (internal function)
+#[update]
+fn update_synthetic_job_progress(job_id: String, progress: u8, status: String) -> Result<(), String> {
+    let user_str = caller().to_string();
+    
+    SYNTHETIC_JOBS.with_borrow_mut(|jobs| {
+        if let Some(mut job) = jobs.get(&job_id) {
+            if job.is_authorized(&user_str) {
+                job.progress = progress;
+                job.status = status;
+                if progress >= 100 {
+                    job.completed_at = Some(ic_cdk::api::time());
+                    job.status = "completed".to_string();
+                    
+                    // Create a synthetic dataset (mock implementation)
+                    let synthetic_dataset_id = format!("synthetic_{}_{}", job.dataset_id, ic_cdk::api::time());
+                    job.result_dataset_id = Some(synthetic_dataset_id.clone());
+                    
+                    // Create the synthetic dataset as a new note
+                    let _ = create_synthetic_dataset(&job, &synthetic_dataset_id);
+                }
+                jobs.insert(job_id, job);
+                Ok(())
+            } else {
+                Err("Unauthorized access to job".to_string())
+            }
+        } else {
+            Err("Job not found".to_string())
+        }
+    })
+}
+
+/// Gets all synthetic jobs for the current user
+#[update]
+fn get_my_synthetic_jobs() -> Vec<SyntheticDataJob> {
+    let user_str = caller().to_string();
+    
+    SYNTHETIC_JOBS.with_borrow(|jobs| {
+        jobs.iter()
+            .filter_map(|(_, job)| {
+                if job.is_authorized(&user_str) {
+                    Some(job)
+                } else {
+                    None
+                }
+            })
+            .collect()
+    })
+}
+
+/// Creates a synthetic dataset from a completed job (internal function)
+fn create_synthetic_dataset(job: &SyntheticDataJob, synthetic_dataset_id: &str) -> Result<NoteId, String> {
+    // Generate mock synthetic CSV data
+    let synthetic_csv = generate_mock_synthetic_data(&job.settings);
+    
+    // Create a new encrypted note with the synthetic data
+    let owner = job.owner.clone();
+    
+    NOTES.with_borrow_mut(|id_to_note| {
+        NOTE_OWNERS.with_borrow_mut(|owner_to_nids| {
+            let next_note_id = NEXT_NOTE_ID.with_borrow(|id| *id.get());
+            let new_note = EncryptedNote {
+                id: next_note_id,
+                owner: owner.clone(),
+                users: vec![],
+                encrypted_text: synthetic_csv,
+            };
+
+            if let Some(mut owner_nids) = owner_to_nids.get(&owner) {
+                owner_nids.ids.push(new_note.id);
+                owner_to_nids.insert(owner, owner_nids);
+            } else {
+                owner_to_nids.insert(
+                    owner,
+                    NoteIds {
+                        ids: vec![new_note.id],
+                    },
+                );
+            }
+            
+            id_to_note.insert(new_note.id, new_note);
+
+            NEXT_NOTE_ID.with_borrow_mut(|next_note_id| {
+                let id_plus_one = next_note_id
+                    .get()
+                    .checked_add(1)
+                    .expect("failed to increase NEXT_NOTE_ID: reached the maximum");
+                next_note_id
+                    .set(id_plus_one)
+                    .unwrap_or_else(|_e| ic_cdk::trap("failed to set NEXT_NOTE_ID"))
+            });
+            
+            Ok(next_note_id)
+        })
+    })
+}
+
+/// Generates mock synthetic data based on the request settings
+fn generate_mock_synthetic_data(settings: &SyntheticDataRequest) -> String {
+    let mut csv_lines = vec!["id,age,gender,diagnosis,treatment,outcome,created_date".to_string()];
+    
+    for i in 1..=settings.num_records {
+        let age = 18 + (i * 7) % 80; // Pseudo-random age
+        let gender = if i % 2 == 0 { "M" } else { "F" };
+        let diagnosis = format!("ICD_{}", 1000 + (i * 13) % 1000);
+        let treatment = format!("TX_{}", 100 + (i * 17) % 100);
+        let outcome = if i % 5 == 0 { "Improved" } else { "Stable" };
+        let date = format!("2024-{:02}-{:02}", 1 + (i % 12), 1 + (i % 28));
+        
+        let line = format!("SYN_{:06},{},{},{},{},{},{}", 
+            i, age, gender, diagnosis, treatment, outcome, date);
+        csv_lines.push(line);
+    }
+    
+    csv_lines.join("\n")
 }
